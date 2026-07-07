@@ -1,0 +1,49 @@
+/* Hero Section Styling */
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 70vh;
+    padding: 20px;
+}
+
+.main-logo {
+    max-width: 200px;
+    height: auto;
+    animation: breathe 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    margin-top: 85px; /* Added spacing to prevent navbar congestion */
+    margin-bottom: 20px;
+}
+
+@keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.head {
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 700;
+    letter-spacing: 7px;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+}
+
+.register-btn {
+    font-family: inherit;
+    font-size: 18px;
+    color: azure;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(14px);
+    border-radius: 8px;
+    border: 1.6px solid rgb(98, 138, 156);
+    padding: 12px 35px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.register-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}

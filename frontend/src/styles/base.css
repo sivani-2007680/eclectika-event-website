@@ -1,0 +1,33 @@
+/* common snippet for modern css */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* overall body, animates 4 bright colors infinitely */
+body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    min-height: 100vh;
+    color: aliceblue;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364, #00c6ff);
+    background-size: 400% 400%;
+    animation: skyFlow 10s ease infinite;
+    padding-top: 120px; /* Space for fixed navbar */
+    overflow-x: hidden;
+}
+
+@keyframes skyFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Smooth scrolling offset for anchor navigation links */
+html {
+    scroll-behavior: smooth;
+}
+
+#home, #events, #sponsors, #merch, #gallery {
+    scroll-margin-top: 100px;
+}

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eclectika '26 | Admin Check-in & Moderation</title>
+    
+    <!-- We load your main CSS styling file here so the admin panel matches the fest theme -->
+    <link rel="stylesheet" href="../src/index.css">
+    
+    <!-- HTML5-QRCODE: A free library to scan QR codes using the laptop webcam -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <style>
+        .admin-body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #070b19, #0f172a);
+            min-height: 100vh;
+            color: aliceblue;
+            padding: 40px 20px;
+        }
+        .admin-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: #00c6ff;
+            text-align: center;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+        }
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        @media (max-width: 900px) {
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+        
+        .admin-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Table layout styles */
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .admin-table th, .admin-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .admin-table th {
+            color: #00c6ff;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+        .admin-table td { font-size: 0.9rem; }
+
+        /* Status badges */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .badge-pending { background: rgba(255, 170, 0, 0.15); color: #ffaa00; border: 1px solid #ffaa00; }
+        .badge-admitted { background: rgba(0, 255, 128, 0.15); color: #00ff80; border: 1px solid #00ff80; }
+
+        /* Image Moderation Grid */
+        .moderation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .mod-card {
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .mod-card img { width: 100%; height: 90px; object-fit: cover; }
+        .mod-actions { display: flex; border-top: 1px solid rgba(255,255,255,0.1); }
+        .mod-btn { flex: 1; border: none; padding: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; color: white; }
+        .btn-approve { background: rgba(0, 255, 128, 0.2); }
+        .btn-approve:hover { background: rgba(0, 255, 128, 0.4); }
+        .btn-reject { background: rgba(255, 75, 75, 0.2); }
+        .btn-reject:hover { background: rgba(255, 75, 75, 0.4); }
+    </style>
+</head>
+<body class="admin-body">
+    
+    <!-- FULLSCREEN SECURITY GATEKEEPER LOCK (Suggestion 1) -->
+    <div id="admin-lock-screen" style="position: fixed; inset: 0; background: #070b19; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; font-family: 'Plus Jakarta Sans', sans-serif;">
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 45px 40px; border-radius: 24px; width: 90%; max-width: 420px; text-align: center; backdrop-filter: blur(15px); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);">
+            <span style="font-size: 4rem; display: block; margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(0, 198, 255, 0.5));">🔒</span>
+            <h2 style="color: #00c6ff; margin-bottom: 10px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 3px; font-size: 2.2rem;">Admin Access Required</h2>
+            <p style="font-size: 0.88rem; color: #888; margin-bottom: 25px; line-height: 1.5;">Please enter the administrator passcode to unlock the check-in dashboard panel.</p>
+            <form id="lock-form" onsubmit="unlockDashboard(event)">
+                <input type="password" id="admin-passcode-input" placeholder="Enter Admin Passcode" style="width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: white; text-align: center; margin-bottom: 18px; font-size: 1.05rem;" required>
+                <button type="submit" class="nav-signin-btn" style="width: 100%; padding: 14px; font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px;">Unlock Dashboard</button>
+            </form>
+            <p id="lock-error-msg" style="color: #ff4b4b; font-size: 0.88rem; margin-top: 18px; display: none; font-weight: 600;"></p>
+        </div>
+    </div>
+
+    <h1 class="admin-title">ADMIN CHECK-IN & MODERATION</h1>
+
+    <!-- KPI STATISTICS INSIGHTS ROW (Suggestion 2) -->
+    <div id="stats-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto 30px auto;">
+        <div class="admin-card" style="padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #00c6ff;">
+            <div>
+                <span style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">Attendees</span>
+                <h3 id="stat-users" style="font-size: 2rem; color: #00c6ff; margin-top: 5px; font-weight: 800;">0</h3>
+            </div>
+            <span style="font-size: 2.2rem;">👥</span>
+        </div>
+        <div class="admin-card" style="padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #ffb432;">
+            <div>
+                <span style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">Passes Issued</span>
+                <h3 id="stat-passes" style="font-size: 2rem; color: #ffb432; margin-top: 5px; font-weight: 800;">0</h3>
+            </div>
+            <span style="font-size: 2.2rem;">🎟️</span>
+        </div>
+        <div class="admin-card" style="padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #00ff80;">
+            <div>
+                <span style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">Checked In</span>
+                <h3 id="stat-checkins" style="font-size: 2rem; color: #00ff80; margin-top: 5px; font-weight: 800;">0</h3>
+            </div>
+            <span style="font-size: 2.2rem;">🚪</span>
+        </div>
+        <div class="admin-card" style="padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #b450ff;">
+            <div>
+                <span style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">Feedbacks</span>
+                <h3 id="stat-reviews" style="font-size: 2rem; color: #b450ff; margin-top: 5px; font-weight: 800;">0</h3>
+            </div>
+            <span style="font-size: 2.2rem;">💬</span>
+        </div>
+    </div>
+    
+    <div class="admin-grid">
+        <!-- LEFT PANEL: QR Code Webcam Scanner -->
+        <div class="admin-card">
+            <h3 style="color:#00c6ff; margin-bottom:15px;">QR Scanner</h3>
+            <div id="reader" style="border-radius:12px; overflow:hidden; background:#000;"></div>
+            <div id="scan-result" style="display:none; margin-top:20px; padding:15px; border-radius:8px; font-weight:bold; text-align:center;"></div>
+            <button class="nav-signin-btn" style="width:100%; margin-top:20px;" onclick="startScanner()">Start Camera Scanner</button>
+        </div>
+
+        <!-- RIGHT PANEL: Participant Directory & Search -->
+        <div class="admin-card">
+            <h3 style="color:#00c6ff; margin-bottom:15px;">Participant registry</h3>
+            <input type="text" id="search-input" placeholder="🔍 Search participant name, email, or phone number..." 
+                   style="width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px 14px; color:white; font-family:inherit; margin-bottom:15px;">
+            
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Participant</th>
+                        <th>Registered Events</th>
+                        <th>Check-in Action</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body">
+                    <!-- Dynamic entries will be loaded here -->
+                </tbody>
+            </table>
+            
+            <!-- Gallery Approvals Moderation Section (PENDING QUEUE) -->
+            <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <h3 style="color:#00c6ff;">Photo Moderation Queue</h3>
+                <p style="font-size:0.8rem; color:#888;">Review photos contributed by participants before they go live.</p>
+                <div id="photo-mod-grid" class="moderation-grid">
+                    <!-- Pending pictures will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Manage Approved Live Gallery Section (UNDO SECTION) -->
+            <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <h3 style="color:#00c6ff;">Live Gallery Moments</h3>
+                <p style="font-size:0.8rem; color:#888;">Currently live photos on the homepage. Click 'Remove' to delete them.</p>
+                <div id="live-photos-grid" class="moderation-grid">
+                    <!-- Approved live pictures will be loaded here -->
+                </div>
+            </div>
+
+            <!-- User Reviews Feedbacks Section -->
+            <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <h3 style="color:#00c6ff;">Fest Feedbacks & Reviews</h3>
+                <p style="font-size:0.8rem; color:#888;">Real-time review score and messages from attendees.</p>
+                <div id="feedback-list" style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
+                    <!-- User feedbacks will be loaded here -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Admin JS controller script -->
+    <script src="admin.js"></script>
+</body>
+</html>

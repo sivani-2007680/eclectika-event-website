@@ -1,0 +1,21 @@
+/* About Content Section */
+.about-section {
+    max-width: 900px;
+    margin: 0 auto 80px auto;
+    padding: 0 20px;
+}
+
+.about-card, .about-eckt {
+    background: rgba(167, 193, 199, 0.15); /* Translucent modern card */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    word-spacing: 2px;
+    line-height: 1.8;
+    font-size: 16px;
+    color: #e2e8f0;
+    margin-bottom: 20px;
+}

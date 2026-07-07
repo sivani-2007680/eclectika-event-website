@@ -1,0 +1,65 @@
+/* Section Titles */
+.section-title {
+    zoom: 1.7;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #fff;
+}
+
+/* Events layout styling */
+.events-section {
+    max-width: 900px;
+    margin: 0 auto 80px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.event-group {
+    margin: 40px 0;
+}
+
+/* headings like open for all and reg based */
+.event-group h3,
+.event-group h5 {
+    margin-bottom: 25px;
+    color: #a7c1c7;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 1.3rem;
+}
+
+.event-list {
+    display: flex;
+    flex-direction: column; /* One event per line */
+    align-items: center;   
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.event-btn {
+    padding: 20px 50px;
+    width: 100%;
+    max-width: 500px;  
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-radius: 16px; 
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;    
+    font-size: 1.2rem;   
+    font-family: inherit;
+    text-align: center;
+}
+
+.event-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05); 
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.small-events-info strong {
+    color: #a7c1c7;
+    font-weight: bold;
+}
